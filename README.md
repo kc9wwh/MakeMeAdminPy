@@ -45,3 +45,30 @@ When you open the scripts you will find some user variables that will need to be
 | :---: | :---: | :---: | :---: |
 |   | MakeMeAdmin - Compliance Status | is not | Compliant |
 
+**Step 4 - Create your policies**
+
+* Policy: MakeMeAdmin
+  * Payload - General
+    * Display Name: *MakeMeAdmin*
+    * Enabled: *Checked*
+    * Category: {Your Choice}
+    * Trigger(s): *None*
+    * Execution Frequency: *Once every day (recommended)*
+  * Payload - Scripts
+    * Scripts: *grantTempAdmin.py*
+  * Scope
+    * *Configure to your requirements*
+  * Self Service
+    * *Configure to your requirements*
+* Policy: MakeMeAdmin - Remove Admin Rights
+  * Payload - General
+    * Display Name: *MakeMeAdmin - Remove Admin Rights*
+    * Enabled: *Checked*
+    * Category: {Your Choice}
+    * Trigger(s): Custom w/ Event *adminremove*
+    * Execution Frequency: *Ongoing*
+  * Payload - Scripts
+    * Scripts: *removeTempAdmin.py*
+  * Scope
+    * Targets: *All Computers*
+    
