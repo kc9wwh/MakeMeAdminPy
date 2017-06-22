@@ -15,12 +15,12 @@ Written By: Joshua Roskos | Professional Services Engineer | Jamf
 Created On: June 20th, 2017 | Updated On: June 22nd, 2017
 ___
 
-**Why is this needed?**
+### Why is this needed?
 
 This workflow has long been used by many organizations, however one issue always remained..."What if the user creates another admin account while they have admin rights?" Well, fear no more, as this script will capture the current admin users before granting temporary admin rights and then after it revokes the rights, it will check again and compare to see if any new accounts were created. If so, the status will be written to a plist and can then be captured via the EA (Extension Attribute) which can then be scoped via a Smart Computer Group.
 
 
-**Implementation**
+### Implementation
 
 **Step 1 - Configure the Scripts**
 
