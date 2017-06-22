@@ -11,6 +11,7 @@ Requirements:
 * EA's: EA-MakeMeAdmin_ComplianceCheck.py
 
 Written By: Joshua Roskos | Professional Services Engineer | Jamf
+
 Created On: June 20th, 2017 | Updated On: June 22nd, 2017
 ___
 
@@ -20,13 +21,16 @@ This workflow has long been used by many organizations, however one issue always
 
 
 **Implementation**
+
 **Step 1 - Configure the Scripts**
+
 When you open the scripts you will find some user variables that will need to be defined as specified below:
 * grantTempAdmin.py - Lines 66-72
 * removeTempAdmin.py - Lines 66-70
 * EA-MakeMeAdmin_ComplianceCheck.py - Lines 5-6
 
 **Step 2 - Upload the EA**
+
 * Display Name: MakeMeAdmin - Compliance Status
 * Data Type: String
 * Inventory Display: {Your Choice}
@@ -34,8 +38,10 @@ When you open the scripts you will find some user variables that will need to be
 * Script: {Paste Contents of EA-MakeMeAdmin_ComplianceCheck.py}
 
 **Step 3 - Configure the Smart Group**
-*Create a Smart Group named "MakeMeAdmin - Violations" and ensure "Send email notification on membership change" is enabled.
-|  And/Or  |              Criteria             |     Operator     |     Value     |
-| -------- | --------------------------------- | ---------------- | ------------- |
-|          |  MakeMeAdmin - Compliance Status  |      is not      |   Compliant   |
+
+*Create a Smart Group named "MakeMeAdmin - Violations" and ensure "Send email notification on membership change" is enabled.*
+
+| And/Or | Criteria | Operator | Value |
+| :---: | :---: | :---: | :---: |
+|   | MakeMeAdmin - Compliance Status | is not | Compliant |
 
