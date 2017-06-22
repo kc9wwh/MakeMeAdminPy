@@ -31,7 +31,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # 
 # This script was modified from Andrina Kelly's version presented at JNUC2013 for allowing
-# a user to elevate their privelages to administrator once per day for 60 minutes.
+# a user to elevate their privelages to administrator once per day for 30 minutes.
 #
 # To accomplish this the following will be performed:
 #			- A launch daemon will be put in place in order to remove admin rights
@@ -48,7 +48,7 @@
 # Written by: Joshua Roskos | Professional Services Engineer | Jamf
 #
 # Created On: June 20th, 2017
-# Updated On: June 21st, 2017
+# Updated On: June 22nd, 2017
 # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -68,7 +68,7 @@ workingDir = '/usr/local/jamfps/'               # working directory for script
 launchdFile = 'com.jamfps.adminremove.plist'    # launch daemon file location
 plistFile = 'MakeMeAdmin.plist'                 # launch daemon file location
 tempAdminLog = 'tempAdmin.log'                  # script log file
-adminTimer = 900                                # how long should they have admin rights for (in seconds)
+adminTimer = 1800                               # how long should they have admin rights for (in seconds)
 policyCustomTrigger = 'adminremove'             # custom trigger specified for removeTempAdmin.py policy
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -76,6 +76,7 @@ policyCustomTrigger = 'adminremove'             # custom trigger specified for r
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # place launchd plist to call JSS policy to remove admin rights.
+print 'Creating LaunchDaemon...'
 launchDaemon = { 'Label':'com.jamfps.adminremove',
                  'ProgramArguments':['/usr/local/jamf/bin/jamf', 'policy', '-trigger', policyCustomTrigger],
                  'StartInterval':adminTimer,
@@ -89,6 +90,7 @@ os.chown('/Library/LaunchDaemons/' + launchdFile, userID, groupID)
 os.chmod('/Library/LaunchDaemons/' + launchdFile, 0644)
 
 # load the removal plist timer. 
+print 'Loading LaunchDaemon...'
 subprocess.call(["launchctl", "load", "-w", '/Library/LaunchDaemons/' + launchdFile])
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -96,19 +98,24 @@ subprocess.call(["launchctl", "load", "-w", '/Library/LaunchDaemons/' + launchdF
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # build log files
-if not os.path.exists("/usr/local/jamfps/"):
-    os.makedirs("/usr/local/jamfps/")
-
-log = open(workingDir + tempAdminLog, "a+")
-log.write("{} - MakeMeAdmin Granted Admin Rights for {}\r\n".format(datetime.now(), userName))
-log.close()
+if not os.path.exists(workingDir):
+    os.makedirs(workingDir)
 
 # record user that will need to have admin rights removed
 # record current existing admins
+print 'Retrieving List of Current Admins...'
 currentAdmins = grp.getgrnam('admin').gr_mem
+print 'Updating Plist...'
 plist = { 'User2Remove':userName,
           'CurrentAdminUsers':currentAdmins}
 plistlib.writePlist(plist, workingDir + plistFile)
 
 # give current logged user admin rights
 subprocess.call(["dseditgroup", "-o", "edit", "-a", userName, "-t", "user", "admin"])
+
+# add log entry
+log = open(workingDir + tempAdminLog, "a+")
+log.write("{} - MakeMeAdmin Granted Admin Rights for {}\r\n".format(datetime.now(), userName))
+log.close()
+
+print 'Granted Admin Right to ' + userName

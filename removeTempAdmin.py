@@ -48,7 +48,7 @@
 # Written by: Joshua Roskos | Professional Services Engineer | Jamf
 #
 # Created On: June 20th, 2017
-# Updated On: June 21st, 2017
+# Updated On: June 22nd, 2017
 # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -81,12 +81,14 @@ if os.path.exists(workingDir + plistFile):
     log = open(workingDir + tempAdminLog, "a+")
     log.write("{} - MakeMeAdmin Removed Admin Rights for {}\r\n".format(datetime.now(), user2Remove))
     log.close()
+    print 'Revoked Admin Rights for ' + user2Remove
     # compre prior to current admin lists
+    print 'Checking for newly created admin accounts...'
     priorAdmins = plistlib.readPlist(workingDir + plistFile).CurrentAdminUsers
     currentAdmins = grp.getgrnam('admin').gr_mem
     newAdmins = set(currentAdmins).difference(set(priorAdmins))
     if not newAdmins:
-        print 'No New Accounts Found!'
+        print '   No New Accounts Found!'
         # update compliancy plist
         status = { 'Status':'Compliant'}
         plistlib.writePlist(status, workingDir + statusFile)
@@ -98,13 +100,14 @@ if os.path.exists(workingDir + plistFile):
         status = { 'Status':'Non-Compliant',
                    'newAdmins':list(newAdmins)}
         plistlib.writePlist(status, workingDir + statusFile)
+        print 'New Admin Accounts Found - ' + newAdmins
     os.remove(workingDir + plistFile)
+
+if os.path.exists('/Library/LaunchDaemons/' + launchdFile):
+    print 'Unloading LaunchDaemon...'
     subprocess.call(["launchctl", "unload", "-w", '/Library/LaunchDaemons/' + launchdFile])
     time.sleep(3)
-    os.remove('/Library/LaunchDaemons/' + launchdFile)
-else:
-    subprocess.call(["launchctl", "unload", "-w", '/Library/LaunchDaemons/' + launchdFile])
-    time.sleep(3)
+    print 'Removing LaunchDaemon...'
     os.remove('/Library/LaunchDaemons/' + launchdFile)
 
 # Submit Jamf Pro Inventory

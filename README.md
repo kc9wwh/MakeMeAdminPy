@@ -1,2 +1,41 @@
 # MakeMeAdminPy
-Updated MakeMeAdmin workflow from Andrina Kelly's JNUC2013 presentation now converted to Python with violation checking if additional accounts get created during the users time as a temporary admin.
+###### Updated MakeMeAdmin workflow from Andrina Kelly's JNUC2013 presentation now converted to Python with violation checking if additional accounts get created during the users time as a temporary admin.
+___
+This script was designed to be used in a Self Service policy to allow users to become temporary administrators on their system for the time specifed as 'adminTimer'. Once the timer reaches zero, the users admin rights will be revoked and the system will be checked for any admin accounts that may have been created during the 'adminTimer'.
+
+Requirements:
+* Jamf Pro
+* Policy for enabling tempAdmin via Self Service
+* Policy to remove tempAdmin via custom trigger
+* Scripts: grantTempAdmin.py & removeTempAdmin.py
+* EA's: EA-MakeMeAdmin_ComplianceCheck.py
+
+Written By: Joshua Roskos | Professional Services Engineer | Jamf
+Created On: June 20th, 2017 | Updated On: June 22nd, 2017
+___
+
+**Why is this needed?**
+
+This workflow has long been used by many organizations, however one issue always remained..."What if the user creates another admin account while they have admin rights?" Well, fear no more, as this script will capture the current admin users before granting temporary admin rights and then after it revokes the rights, it will check again and compare to see if any new accounts were created. If so, the status will be written to a plist and can then be captured via the EA (Extension Attribute) which can then be scoped via a Smart Computer Group.
+
+
+**Implementation**
+**Step 1 - Configure the Scripts**
+When you open the scripts you will find some user variables that will need to be defined as specified below:
+* grantTempAdmin.py - Lines 66-72
+* removeTempAdmin.py - Lines 66-70
+* EA-MakeMeAdmin_ComplianceCheck.py - Lines 5-6
+
+**Step 2 - Upload the EA**
+* Display Name: MakeMeAdmin - Compliance Status
+* Data Type: String
+* Inventory Display: {Your Choice}
+* Input Type: Script
+* Script: {Paste Contents of EA-MakeMeAdmin_ComplianceCheck.py}
+
+**Step 3 - Configure the Smart Group**
+*Create a Smart Group named "MakeMeAdmin - Violations" and ensure "Send email notification on membership change" is enabled.
+|  And/Or  |              Criteria             |     Operator     |     Value     |
+| -------- | --------------------------------- | ---------------- | ------------- |
+|          |  MakeMeAdmin - Compliance Status  |      is not      |   Compliant   |
+
