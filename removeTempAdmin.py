@@ -100,7 +100,7 @@ if os.path.exists(workingDir + plistFile):
         status = { 'Status':'Non-Compliant',
                    'newAdmins':list(newAdmins)}
         plistlib.writePlist(status, workingDir + statusFile)
-        print 'New Admin Accounts Found - ' + newAdmins
+        print 'New Admin Accounts Found - ' + str(newAdmins)
     os.remove(workingDir + plistFile)
 
 if os.path.exists('/Library/LaunchDaemons/' + launchdFile):

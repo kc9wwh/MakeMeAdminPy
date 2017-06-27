@@ -43,7 +43,7 @@ When you open the scripts you will find some user variables that will need to be
 
 | And/Or | Criteria | Operator | Value |
 | :---: | :---: | :---: | :---: |
-|   | MakeMeAdmin - Compliance Status | is not | Compliant |
+|   | MakeMeAdmin - Compliance Status | Like | Non-Compliant |
 
 **Step 4 - Create your policies**
 
