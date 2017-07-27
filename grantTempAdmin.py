@@ -31,7 +31,10 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # 
 # This script was modified from Andrina Kelly's version presented at JNUC2013 for allowing
-# a user to elevate their privelages to administrator once per day for 30 minutes.
+# a user to elevate their privelages to administrator once per day for 30 minutes. After 
+# the 30 minutes if a user created a new admin account that account will have admin rights
+# also revoked. If the user changed the organization admin account password, that will also
+# be reset.
 #
 # To accomplish this the following will be performed:
 #			- A launch daemon will be put in place in order to remove admin rights
@@ -43,12 +46,13 @@
 #			- Policy for enabling tempAdmin via Self Service
 #			- Policy to remove tempAdmin via custom trigger
 #			- tempAdmin.sh & removeTempAdmin.sh Scripts
+#           - orgAdmin encrypted password specified in Jamf Pro parameter #4
 #
 #
 # Written by: Joshua Roskos | Professional Services Engineer | Jamf
 #
 # Created On: June 20th, 2017
-# Updated On: June 22nd, 2017
+# Updated On: July 26th, 2017
 # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
@@ -56,20 +60,23 @@
 # IMPORTS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-import os, plistlib, pwd, grp, subprocess
+import os, plistlib, pwd, grp, subprocess, sys
+from SystemConfiguration import SCDynamicStoreCopyConsoleUser
 from datetime import datetime
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # VARIABLES
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-userName = os.getlogin()                        # get the logged in user's name
-workingDir = '/usr/local/jamfps/'               # working directory for script
-launchdFile = 'com.jamfps.adminremove.plist'    # launch daemon file location
-plistFile = 'MakeMeAdmin.plist'                 # launch daemon file location
-tempAdminLog = 'tempAdmin.log'                  # script log file
-adminTimer = 1800                               # how long should they have admin rights for (in seconds)
-policyCustomTrigger = 'adminremove'             # custom trigger specified for removeTempAdmin.py policy
+userName = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]   # get the logged in user's name
+workingDir = '/usr/local/jamfps/'                                           # working directory for script
+launchdFile = 'com.jamfps.adminremove.plist'                                # launch daemon file name
+launchdLabel = launchdFile.replace('.plist', '')                            # launch daemon label
+plistFile = 'MakeMeAdmin.plist'                                             # settings file name
+tempAdminLog = 'tempAdmin.log'                                              # script log file
+adminTimer = 1800                                                           # how long should they have admin rights for (in seconds)
+policyCustomTrigger = 'adminremove'                                         # custom trigger specified for removeTempAdmin.py policy
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # LAUNCH DAEMON
@@ -77,9 +84,11 @@ policyCustomTrigger = 'adminremove'             # custom trigger specified for r
 
 # place launchd plist to call JSS policy to remove admin rights.
 print 'Creating LaunchDaemon...'
-launchDaemon = { 'Label':'com.jamfps.adminremove',
+launchDaemon = { 'Label':launchdLabel,
+                 'LaunchOnlyOnce':True,
                  'ProgramArguments':['/usr/local/jamf/bin/jamf', 'policy', '-trigger', policyCustomTrigger],
                  'StartInterval':adminTimer,
+                 'UserName':'root',
                  }
 plistlib.writePlist(launchDaemon, '/Library/LaunchDaemons/' + launchdFile)
 

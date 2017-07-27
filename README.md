@@ -1,7 +1,7 @@
 # MakeMeAdminPy
-###### Updated MakeMeAdmin workflow from Andrina Kelly's JNUC2013 presentation now converted to Python with violation checking if additional accounts get created during the users time as a temporary admin.
+###### Updated MakeMeAdmin workflow from Andrina Kelly's JNUC2013 presentation now converted to Python with violation checking and remediation if additional accounts get created during the users time as a temporary admin.
 ___
-This script was designed to be used in a Self Service policy to allow users to become temporary administrators on their system for the time specifed as 'adminTimer'. Once the timer reaches zero, the users admin rights will be revoked and the system will be checked for any admin accounts that may have been created during the 'adminTimer'.
+This script was designed to be used in a Self Service policy to allow users to become temporary administrators on their system for the time specifed as 'adminTimer'. Once the timer reaches zero, the users admin rights will be revoked and the system will be checked for any admin accounts that may have been created during the 'adminTimer'. If a user created an admin account it will be logged and reported back to Jamf Pro and then the admin rights will be revoked for those newly created accounts. We've also added the ability to enter your orgAdmin account(s) and verify those accounts are still valid and haven't been changed.
 
 Requirements:
 * Jamf Pro
@@ -10,9 +10,12 @@ Requirements:
 * Scripts: grantTempAdmin.py & removeTempAdmin.py
 * EA's: EA-MakeMeAdmin_ComplianceCheck.py
 
+Please reference https://github.com/brysontyrrell/EncryptedStrings for generating the encrypting password, salt, and passphrase strings.
+
+
 Written By: Joshua Roskos | Professional Services Engineer | Jamf
 
-Created On: June 20th, 2017 | Updated On: June 22nd, 2017
+Created On: June 20th, 2017 | Updated On: July 26th, 2017
 ___
 
 ### Why is this needed?
@@ -25,8 +28,8 @@ This workflow has long been used by many organizations, however one issue always
 **Step 1 - Configure the Scripts**
 
 When you open the scripts you will find some user variables that will need to be defined as specified below:
-* grantTempAdmin.py - Lines 66-72
-* removeTempAdmin.py - Lines 66-70
+* grantTempAdmin.py - Lines 72-79
+* removeTempAdmin.py - Lines 70-77
 * EA-MakeMeAdmin_ComplianceCheck.py - Lines 5-6
 
 **Step 2 - Upload the EA**
@@ -43,7 +46,8 @@ When you open the scripts you will find some user variables that will need to be
 
 | And/Or | Criteria | Operator | Value |
 | :---: | :---: | :---: | :---: |
-|   | MakeMeAdmin - Compliance Status | Like | Non-Compliant |
+|   | MakeMeAdmin - Compliance Status | Like | Remediated |
+| Or | MakeMeAdmin - Compliance Status | Like | Violation |
 
 **Step 4 - Create your policies**
 
@@ -60,6 +64,8 @@ When you open the scripts you will find some user variables that will need to be
     * *Configure to your requirements*
   * Self Service
     * *Configure to your requirements*
+  * User Interaction
+    * Complete Message: *You have been granted admin rights for the next 30 minutes.*
 * Policy: MakeMeAdmin - Remove Admin Rights
   * Payload - General
     * Display Name: *MakeMeAdmin - Remove Admin Rights*
@@ -71,4 +77,6 @@ When you open the scripts you will find some user variables that will need to be
     * Scripts: *removeTempAdmin.py*
   * Scope
     * Targets: *All Computers*
+  * User Interaction
+    * Complete Message: *Time up! Your admin rights have been revoked.*
     
