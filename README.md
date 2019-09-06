@@ -75,6 +75,7 @@ When you open the scripts you will find some user variables that will need to be
     * Execution Frequency: *Ongoing*
   * Payload - Scripts
     * Scripts: *removeTempAdmin.py*
+      * Parameter 4: *Your orgAdmin password encrypted*
   * Scope
     * Targets: *All Computers*
   * User Interaction
