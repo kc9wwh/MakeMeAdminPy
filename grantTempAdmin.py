@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/Library/ManagedFrameworks/Python/Python3.framework/Versions/Current/bin/python3
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 #
@@ -13,6 +13,7 @@
 #                 documentation and/or other materials provided with the distribution.
 #               * Neither the name of the Jamf nor the names of its contributors may be
 #                 used to endorse or promote products derived from this software without 
+#                 used to endorse or promote products derived from this software without
 #                 specific prior written permission.
 #
 #       THIS SOFTWARE IS PROVIDED BY JAMF SOFTWARE, LLC "AS IS" AND ANY
@@ -55,6 +56,7 @@
 # Updated On: July 26th, 2017
 # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# Updated On: April 20th, 2022 - python3
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # IMPORTS
@@ -83,23 +85,24 @@ policyCustomTrigger = 'adminremove'                                         # cu
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # place launchd plist to call JSS policy to remove admin rights.
-print 'Creating LaunchDaemon...'
+print('Creating LaunchDaemon...')
 launchDaemon = { 'Label':launchdLabel,
                  'LaunchOnlyOnce':True,
                  'ProgramArguments':['/usr/local/jamf/bin/jamf', 'policy', '-trigger', policyCustomTrigger],
                  'StartInterval':adminTimer,
                  'UserName':'root',
                  }
-plistlib.writePlist(launchDaemon, '/Library/LaunchDaemons/' + launchdFile)
+with open('/Library/LaunchDaemons/' + launchdFile, "wb") as fp:
+    plistlib.dump(launchDaemon, fp)
 
 # set the permission on the file just made.
 userID = pwd.getpwnam("root").pw_uid
 groupID = grp.getgrnam("wheel").gr_gid
 os.chown('/Library/LaunchDaemons/' + launchdFile, userID, groupID)
-os.chmod('/Library/LaunchDaemons/' + launchdFile, 0644)
+os.chmod('/Library/LaunchDaemons/' + launchdFile, 0o644)
 
-# load the removal plist timer. 
-print 'Loading LaunchDaemon...'
+# load the removal plist timer.
+print('Loading LaunchDaemon...')
 subprocess.call(["launchctl", "load", "-w", '/Library/LaunchDaemons/' + launchdFile])
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -112,12 +115,13 @@ if not os.path.exists(workingDir):
 
 # record user that will need to have admin rights removed
 # record current existing admins
-print 'Retrieving List of Current Admins...'
+print('Retrieving List of Current Admins...')
 currentAdmins = grp.getgrnam('admin').gr_mem
-print 'Updating Plist...'
+print('Updating Plist...')
 plist = { 'User2Remove':userName,
           'CurrentAdminUsers':currentAdmins}
-plistlib.writePlist(plist, workingDir + plistFile)
+with open(workingDir + plistFile, "wb") as fp:
+    plistlib.dump(plist, fp)
 
 # give current logged user admin rights
 subprocess.call(["dseditgroup", "-o", "edit", "-a", userName, "-t", "user", "admin"])
@@ -127,4 +131,4 @@ log = open(workingDir + tempAdminLog, "a+")
 log.write("{} - MakeMeAdmin Granted Admin Rights for {}\r\n".format(datetime.now(), userName))
 log.close()
 
-print 'Granted Admin Right to ' + userName
+print('Granted Admin Right to ' + userName)

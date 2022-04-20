@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/Library/ManagedFrameworks/Python/Python3.framework/Versions/Current/bin/python3
 
 import os, plistlib, subprocess
 
@@ -8,10 +8,10 @@ statusFile = 'MakeMeAdmin.Status.plist'         # compliancy check plist locatio
 if os.path.exists(workingDir + statusFile):
     status = plistlib.readPlist(workingDir + statusFile).Status
     if status == 'Compliant':
-        print '<result>' + status + '</result>'
+        print('<result>' + status + '</result>')
     else:
         newAdm = plistlib.readPlist(workingDir + statusFile).newAdmins
         orgAdm = plistlib.readPlist(workingDir + statusFile).orgAdmin
-        print '<result>' + status + ' - ' + newAdm + ' - ' + orgAdm + '</result>'
+        print('<result>' + status + ' - ' + newAdm + ' - ' + orgAdm + '</result>')
 else:
-    print '<result>' + 'Compliant' + '</result>'
+    print('<result>' + 'Compliant' + '</result>')
